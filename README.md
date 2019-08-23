@@ -1,11 +1,10 @@
-# Repositório de Sistemas Embarcados
+﻿# Repositório de Sistemas Embarcados
 ## Teórico e Prático
 EL68E - Sistemas Embarcados 2019/2
 
 Alunos:
 * Adriano Ricardo de Abreu Gamba
 * Davi Wei Tokikawa
-* *INSIRA TERCEIRO ALUNO AQUI*
 
 ### Observações
 
