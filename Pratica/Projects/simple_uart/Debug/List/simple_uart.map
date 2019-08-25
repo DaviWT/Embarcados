@@ -1,24 +1,24 @@
 ###############################################################################
 #
-# IAR ELF Linker V8.40.1.212/W32 for ARM                  23/Aug/2019  19:16:43
+# IAR ELF Linker V8.40.1.212/W32 for ARM                  25/Aug/2019  20:05:35
 # Copyright 2007-2019 IAR Systems AB.
 #
 #    Output file  =
-#        C:\Users\Davi\Desktop\GIT\Embarcados\Pratica\Projects\simple_uart\Debug\Exe\simple_uart.out
+#        C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\Debug\Exe\simple_uart.out
 #    Map file     =
-#        C:\Users\Davi\Desktop\GIT\Embarcados\Pratica\Projects\simple_uart\Debug\List\simple_uart.map
+#        C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\Debug\List\simple_uart.map
 #    Command line =
-#        -f C:\Users\Davi\AppData\Local\Temp\EW5670.tmp
-#        (C:\Users\Davi\Desktop\GIT\Embarcados\Pratica\TivaWare_C_Series-2.1.4.178\driverlib\ewarm\Exe\driverlib.a
-#        C:\Users\Davi\Desktop\GIT\Embarcados\Pratica\Projects\simple_uart\Debug\Obj\simple_uart.o
-#        C:\Users\Davi\Desktop\GIT\Embarcados\Pratica\Projects\simple_uart\Debug\Obj\startup_TM4C1294.o
-#        C:\Users\Davi\Desktop\GIT\Embarcados\Pratica\Projects\simple_uart\Debug\Obj\system_TM4C1294_TW.o
-#        C:\Users\Davi\Desktop\GIT\Embarcados\Pratica\Projects\simple_uart\Debug\Obj\uartstdio.o
+#        -f C:\Users\PCHOME\AppData\Local\Temp\EWD7F6.tmp
+#        (C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\TivaWare_C_Series-2.1.4.178\driverlib\ewarm\Exe\driverlib.a
+#        C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\Debug\Obj\simple_uart.o
+#        C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\Debug\Obj\startup_TM4C1294.o
+#        C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\Debug\Obj\system_TM4C1294_TW.o
+#        C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\Debug\Obj\uartstdio.o
 #        --no_out_extension -o
-#        C:\Users\Davi\Desktop\GIT\Embarcados\Pratica\Projects\simple_uart\Debug\Exe\simple_uart.out
+#        C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\Debug\Exe\simple_uart.out
 #        --map
-#        C:\Users\Davi\Desktop\GIT\Embarcados\Pratica\Projects\simple_uart\Debug\List\simple_uart.map
-#        --config "C:\Program Files (x86)\IAR Systems\Embedded Workbench
+#        C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\Debug\List\simple_uart.map
+#        --config "D:\Program Files (x86)\IAR Systems\Embedded Workbench
 #        8.3\arm\config\linker\TexasInstruments\TM4C1294NC.icf" --semihosting
 #        --entry __iar_program_start --vfe --text_out locale)
 #
@@ -144,7 +144,7 @@ command line/config:
     -----------------------------------------------
     Total:
 
-C:\Users\Davi\Desktop\GIT\Embarcados\Pratica\Projects\simple_uart\Debug\Obj: [1]
+C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\Debug\Obj: [1]
     simple_uart.o             396       40        1
     startup_TM4C1294.o        982
     system_TM4C1294_TW.o       44                 4
@@ -293,7 +293,7 @@ g_ui32UARTTxWriteIndex  0x2000'0480    0x4  Data  Lc  uartstdio.o [1]
 main                         0x1187   0xec  Code  Gb  simple_uart.o [1]
 
 
-[1] = C:\Users\Davi\Desktop\GIT\Embarcados\Pratica\Projects\simple_uart\Debug\Obj
+[1] = C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\Debug\Obj
 [2] = dl7M_tln.a
 [3] = driverlib.a
 [4] = rt7M_tl.a

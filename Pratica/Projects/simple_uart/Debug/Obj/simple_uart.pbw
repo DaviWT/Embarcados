@@ -16854,7 +16854,7 @@
     "display": "void UART0_Handler(void)",
     "location": {
       "column": "6",
-      "line": "36",
+      "line": "37",
       "path": "C:\\Users\\PCHOME\\Desktop\\Git\\Embarcados\\Pratica\\Projects\\simple_uart\\src\\simple_uart.c"
     },
     "name": "UART0_Handler",
@@ -16868,7 +16868,7 @@
     "display": "void SysTick_Handler(void)",
     "location": {
       "column": "6",
-      "line": "40",
+      "line": "42",
       "path": "C:\\Users\\PCHOME\\Desktop\\Git\\Embarcados\\Pratica\\Projects\\simple_uart\\src\\simple_uart.c"
     },
     "name": "SysTick_Handler",
@@ -16882,7 +16882,7 @@
     "display": "void main(void)",
     "location": {
       "column": "6",
-      "line": "45",
+      "line": "48",
       "path": "C:\\Users\\PCHOME\\Desktop\\Git\\Embarcados\\Pratica\\Projects\\simple_uart\\src\\simple_uart.c"
     },
     "name": "main",
