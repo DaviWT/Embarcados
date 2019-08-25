@@ -44,7 +44,7 @@ void SysTick_Handler(void){
 
 void main(void){
   UARTInit();
-  UARTprintf("Teste idiota do Adriano e do Davi!&\n");
+  UARTprintf("Teste idiota2 do Adriano e do Davi!&\n");
   
   SysTickPeriodSet(12000000); // f = 1Hz para clock = 24MHz
   

@@ -23,9 +23,9 @@
 
 if ($debugfile -eq "")
 {
-& "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.3\common\bin\cspybat" -f "C:\Users\Davi\Desktop\GIT\Embarcados\Pratica\Projects\simple_uart\settings\simple_uart.Debug.general.xcl" --backend -f "C:\Users\Davi\Desktop\GIT\Embarcados\Pratica\Projects\simple_uart\settings\simple_uart.Debug.driver.xcl" 
+& "D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.3\common\bin\cspybat" -f "C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\settings\simple_uart.Debug.general.xcl" --backend -f "C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\settings\simple_uart.Debug.driver.xcl" 
 }
 else
 {
-& "C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.3\common\bin\cspybat" -f "C:\Users\Davi\Desktop\GIT\Embarcados\Pratica\Projects\simple_uart\settings\simple_uart.Debug.general.xcl" --debug_file=$debugfile --backend -f "C:\Users\Davi\Desktop\GIT\Embarcados\Pratica\Projects\simple_uart\settings\simple_uart.Debug.driver.xcl" 
+& "D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.3\common\bin\cspybat" -f "C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\settings\simple_uart.Debug.general.xcl" --debug_file=$debugfile --backend -f "C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\settings\simple_uart.Debug.driver.xcl" 
 }
