@@ -25,7 +25,7 @@ if not "%~1" == "" goto debugFile
 
 @echo on 
 
-"D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.3\common\bin\cspybat" -f "C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\settings\simple_uart.Debug.general.xcl" --backend -f "C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\settings\simple_uart.Debug.driver.xcl" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\common\bin\cspybat" -f "C:\Users\DAELN\Downloads\Embarcados-master\Pratica\Projects\simple_uart\settings\simple_uart.Debug.general.xcl" --backend -f "C:\Users\DAELN\Downloads\Embarcados-master\Pratica\Projects\simple_uart\settings\simple_uart.Debug.driver.xcl" 
 
 @echo off 
 goto end 
@@ -34,7 +34,7 @@ goto end
 
 @echo on 
 
-"D:\Program Files (x86)\IAR Systems\Embedded Workbench 8.3\common\bin\cspybat" -f "C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\settings\simple_uart.Debug.general.xcl" "--debug_file=%~1" --backend -f "C:\Users\PCHOME\Desktop\Git\Embarcados\Pratica\Projects\simple_uart\settings\simple_uart.Debug.driver.xcl" 
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\common\bin\cspybat" -f "C:\Users\DAELN\Downloads\Embarcados-master\Pratica\Projects\simple_uart\settings\simple_uart.Debug.general.xcl" "--debug_file=%~1" --backend -f "C:\Users\DAELN\Downloads\Embarcados-master\Pratica\Projects\simple_uart\settings\simple_uart.Debug.driver.xcl" 
 
 @echo off 
 :end

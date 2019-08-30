@@ -1,3 +1,14 @@
+/*
+LAB 1 SISTEMAS EMBARCADOS - UTFPR 2019/2
+Alunos:
+-Adriano Ricardo de Abreu Gamba
+-Davi Wei Tokikawa
+
+Demodulator PWM
+Output: Duty-Cycle, Period and Frequency.
+Input: PWM waveform (PIN N4)
+*/
+
 #include <stdint.h>
 #include <stdbool.h>
 // includes da biblioteca driverlib
@@ -5,66 +16,82 @@
 #include "driverlib/gpio.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/systick.h"
+#include "utils/uartstdio.h"
+#include "driverlib/uart.h"
+#include "driverlib/pin_map.h"
+
+#include "system_TM4C1294.h" 
 
 #define NUM ((24000000/2)/8)
+#define SAMPLES 10
 
-uint8_t LED_D1 = 0;
-uint8_t LED_D2 = 0;
-
-/*
-void SysTick_Handler(void){
-  LED_D1 ^= GPIO_PIN_1; // Troca estado do LED D1
-  GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_1, LED_D1); // Acende ou apaga LED D1
-} // SysTick_Handler
-*/
-
-void main(void){
-  //SysTickPeriodSet(12000000); // f = 1Hz para clock = 24MHz
-  
-  SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION); // Habilita GPIO N (LED D1 = PN1, LED D2 = PN0)
-  while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPION)); // Aguarda final da habilitação
-  
-  GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_0 | GPIO_PIN_1); // LEDs D1 e D2 como saída
-  GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_0 | GPIO_PIN_1, 0); // LEDs D1 e D2 apagados
-  GPIOPadConfigSet(GPIO_PORTN_BASE, GPIO_PIN_0 | GPIO_PIN_1, GPIO_STRENGTH_12MA, GPIO_PIN_TYPE_STD);
-
-  SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF); // Habilita GPIO F (LED D3 = PF4, LED D4 = PF0)
-  while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOF)); // Aguarda final da habilitação
+void UARTInit(void)
+{
+    // Enable the GPIO Peripheral used by the UART.
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOA));
     
-  GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_4); // LEDs D3 e D4 como saída
-  GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_4, 0); // LEDs D3 e D4 apagados
-  GPIOPadConfigSet(GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_4, GPIO_STRENGTH_12MA, GPIO_PIN_TYPE_STD);
-
-  SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOJ); // Habilita GPIO J (push-button SW1 = PJ0, push-button SW2 = PJ1)
-  while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOJ)); // Aguarda final da habilitação
+    // Enable UART0
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_UART0));
     
-  GPIOPinTypeGPIOInput(GPIO_PORTJ_BASE, GPIO_PIN_0 | GPIO_PIN_1); // push-buttons SW1 e SW2 como entrada
-  GPIOPadConfigSet(GPIO_PORTJ_BASE, GPIO_PIN_0 | GPIO_PIN_1, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+    // Configure GPIO Pins for UART mode.
+    GPIOPinConfigure(GPIO_PA0_U0RX);
+    GPIOPinConfigure(GPIO_PA1_U0TX);
+    GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
+    
+    // Initialize the UART for console I/O.
+    UARTStdioConfig(0, 115200, SystemCoreClock);
+} // UARTInit
 
-  //SysTickIntEnable();
-  //SysTickEnable();
+void GPIOInit()
+{
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION); // Habilita GPIO N (LED D1 = PN1, LED D2 = PN0)
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPION)); // Aguarda final da habilitação
+    GPIOPinTypeGPIOInput(GPIO_PORTN_BASE, GPIO_PIN_4);
+    GPIOPadConfigSet(GPIO_PORTN_BASE, GPIO_PIN_4, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
+}
 
-  while(1){
-    /*
-    if(GPIOPinRead(GPIO_PORTJ_BASE, GPIO_PIN_0) == GPIO_PIN_0) // Testa estado do push-button SW1
-      GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_4, 0); // Apaga LED D3
-    else
-      GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_4, GPIO_PIN_4); // Acende LED D3
-
-    if(GPIOPinRead(GPIO_PORTJ_BASE, GPIO_PIN_1) == GPIO_PIN_1) // Testa estado do push-button SW2
-      GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_0, 0); // Apaga LED D4
-    else
-      GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_0, GPIO_PIN_0); // Acende LED D4
-*/
-    int j;
-    for(j=0;j<NUM;j++);
-    LED_D1 ^= GPIO_PIN_1; // Troca estado do LED D1
-    GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_1, LED_D1); // Acende ou apaga LED D1
-
-    int k;
-    for(k=0;k<NUM/4;k++);
-    LED_D2 ^= GPIO_PIN_0; // Troca estado do LED D1
-    GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_0, LED_D2); // Acende ou apaga LED D1
-     
-  } // while
+void main(void)
+{
+    // Inicializa periféricos
+    UARTInit();
+    GPIOInit();
+    
+    int n = 0;
+    int t_on[SAMPLES];
+    int t_off[SAMPLES];
+    
+    //PORTAR PARA FUNÇÃO CLEAR VECTOR
+    short i;
+    for(i=0;i<SAMPLES;i++)
+    {
+      t_on[i]=0;
+      t_off[i]=0;
+    }
+    
+    while(1)
+    {
+        //sincronização
+        while(GPIOPinRead(GPIO_PORTN_BASE, GPIO_PIN_4) == GPIO_PIN_4);
+        while(GPIOPinRead(GPIO_PORTN_BASE, GPIO_PIN_4) == 0);
+        
+        do
+        {
+          //medição
+          while(GPIOPinRead(GPIO_PORTN_BASE, GPIO_PIN_4) == GPIO_PIN_4)
+              t_on[n]++;
+          while(GPIOPinRead(GPIO_PORTN_BASE, GPIO_PIN_4) == 0)
+              t_off[n]++;
+          n++;
+        }while(n<SAMPLES-1);
+        
+        n = 0;
+        //CALCULO DAS MEDIAS DOS TON e TOFF
+        //CONVERSAO PARA SEGUNDOS
+        //CALCULO DE DUTY-CYCLE, PERIODO e FREQUENCIA
+        //ENVIO PELA UART
+        //LIMPA TON e TOFF
+        
+    } // while
 } // main

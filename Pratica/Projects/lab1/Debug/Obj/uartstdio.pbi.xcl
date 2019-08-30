@@ -1,11 +1,11 @@
-"C:\Users\DAELN\Downloads\Embarcados-master\Pratica\Projects\simple_uart\src\simple_uart.c"
+"C:\Users\DAELN\Downloads\Embarcados-master\Pratica\TivaWare_C_Series-2.1.4.178\utils\uartstdio.c"
 -std=c11
 -ferror-limit=0
 -fbracket-depth=512
 -I
-C:\Users\DAELN\Downloads\Embarcados-master\Pratica\Projects\simple_uart\src
+C:\Users\DAELN\Downloads\Embarcados-master\Pratica\TivaWare_C_Series-2.1.4.178\utils
 -I
-C:\Users\DAELN\Downloads\Embarcados-master\Pratica\Projects\simple_uart\..\..\TivaWare_C_Series-2.1.4.178
+C:\Users\DAELN\Downloads\Embarcados-master\Pratica\Projects\lab1\..\..\TivaWare_C_Series-2.1.4.178
 -I
 C:\Program Files (x86)\IAR Systems\Embedded Workbench 8.1\arm\CMSIS\Core\Include
 -I

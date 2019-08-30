@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project>
     <fileVersion>4</fileVersion>
-    <fileChecksum>2930295227</fileChecksum>
+    <fileChecksum>1514452986</fileChecksum>
     <configuration>
         <name>Debug</name>
         <outputs />
+        <forcedrebuild>
+            <name>[REBUILD_ALL]</name>
+        </forcedrebuild>
     </configuration>
     <configuration>
         <name>Release</name>
