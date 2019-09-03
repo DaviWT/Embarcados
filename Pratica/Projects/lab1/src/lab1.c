@@ -61,6 +61,7 @@ void main(void)
     int n = 0;
     int t_on[SAMPLES];
     int t_off[SAMPLES];
+    int dutyCycle, periodo, freq;
     
     //PORTAR PARA FUNÇÃO CLEAR VECTOR
     short i;
@@ -87,10 +88,16 @@ void main(void)
         }while(n<SAMPLES-1);
         
         n = 0;
+        
         //CALCULO DAS MEDIAS DOS TON e TOFF
+        
         //CONVERSAO PARA SEGUNDOS
+        
         //CALCULO DE DUTY-CYCLE, PERIODO e FREQUENCIA
+        
         //ENVIO PELA UART
+        //UARTprintf("D=%d | T=%d | f=%d\r\n",dutyCycle,periodo,freq);
+        
         //LIMPA TON e TOFF
         
     } // while
