@@ -19,6 +19,7 @@
 // Includes
 //
 #include <stdint.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include "inc/hw_memmap.h"
 #include "driverlib/gpio.h"
@@ -26,6 +27,7 @@
 #include "driverlib/systick.h"
 #include "utils/uartstdio.h"
 #include "driverlib/uart.h"
+#include "driverlib/fpu.h"
 #include "driverlib/pin_map.h"
 #include "system_TM4C1294.h" 
 
@@ -33,9 +35,11 @@
 // Defines
 //
 #define NUM ((24000000/2)/8)
-#define SAMPLES 10           // Number of samples used to get the measure
-#define NCYCLESTON 5         // Number of cycles corresponding to ton count
-#define NCYCLESTOFF 5        // Number of cycles corresponding to toff count
+#define SAMPLES 2000           // Number of samples used to get the measure
+#define NCYCLESTON 23         // Number of cycles corresponding to ton count
+#define NCYCLESTOFF 20.7        // Number of cycles corresponding to toff count
+
+extern void UARTStdioIntHandler(void);
 
 //******************************************************************************
 //
@@ -60,6 +64,11 @@ void UARTInit(void)
     // Initialize the UART for console I/O.
     UARTStdioConfig(0, 115200, SystemCoreClock);
 } // UARTInit
+
+void UART0_Handler(void)
+{
+    UARTStdioIntHandler();
+} // UART0_Handler
 
 //******************************************************************************
 //
@@ -88,15 +97,19 @@ void GPIOInit()
 void main(void)
 {
     // Inicializa periféricos
-    UARTInit();
     GPIOInit();
+    UARTInit();
     
     // Inicializa as variaveis
     int n = 0;
     int t_on[SAMPLES];
     int t_off[SAMPLES];
     int tonMed=0, toffMed=0;
-    int T=0, f=0, D=0;
+    FPUEnable();
+    FPULazyStackingEnable();
+    float T=10, f=0, D=0;
+    float ton_f=0, toff_f=0;
+    char T_str[10], f_str[10], D_str[10];
     
     //PORTAR PARA FUNÇÃO CLEAR VECTOR
     short i;
@@ -105,6 +118,9 @@ void main(void)
         t_on[i]=0;
         t_off[i]=0;
     }
+    
+    // Mensagem de inicio
+    UARTprintf("Inicio\n");
     
     // Main loop
     while(1)
@@ -128,25 +144,29 @@ void main(void)
         
         // Calculo dos valores medios
         tonMed = 0;
+        toffMed = 0;
         for(i=0; i<SAMPLES; i++)
         {
             tonMed = tonMed + t_on[i];
             toffMed = toffMed + t_off[i];
         }
-        tonMed = tonMed/SAMPLES;
-        toffMed = toffMed/SAMPLES;
+        ton_f = (float)tonMed/SAMPLES;
+        toff_f = (float)toffMed/SAMPLES;
         
-        // Conversao para segundos @TODO verificar se SystemCoreClock funciona e ajustar
-        tonMed = NCYCLESTON*tonMed/SystemCoreClock;
-        toffMed = NCYCLESTOFF*toffMed/SystemCoreClock;
+        // Conversao para MICRO segundos
+        ton_f = (float)(1000000*(float)NCYCLESTON*((float)(ton_f/SystemCoreClock)));
+        toff_f = (float)(1000000*(float)NCYCLESTOFF*((float)(toff_f/SystemCoreClock)));
         
         // Calculo dos parametros do sinal
-        T = tonMed + toffMed;
-        f = 1/T;
-        D = 100*tonMed/T;
+        T = ton_f + toff_f;
+        f = (float)1000000/T;
+        D = (float)100*ton_f/T;
         
-        // Envia dos parametros por UART
-        UARTprintf("T = %i s | f = %i Hz | D = %i\r\n",T,f,D);
+        // Envia os parametros por UART
+        sprintf(T_str,"%.2f",T);
+        sprintf(f_str,"%.2f",f);
+        sprintf(D_str,"%.2f",D);
+        UARTprintf("T = %s ns | f = %s Hz | D = %s \n",T_str,f_str,D_str);
         
         // Limpa ton e toff
         for(i=0; i<SAMPLES; i++)
