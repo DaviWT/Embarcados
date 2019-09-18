@@ -35,20 +35,26 @@
 // Defines
 //
 #define NUM ((24000000/2)/8)
-#define SAMPLES 1000           // Number of samples used to get the measure
+#define SAMPLES 2400           // Number of samples used to get the measure
 
-//24MHz - 10kHz
+// 24MHz - 10kHz
 //#define NCYCLESTON 23         // Number of cycles corresponding to ton count
 //#define NCYCLESTOFF 20.7        // Number of cycles corresponding to toff count
-//120MHz - 10kHz
-#define NCYCLESTON 27         // Number of cycles corresponding to ton count
-#define NCYCLESTOFF 20.86        // Number of cycles corresponding to toff count
-//120MHz - 1kHz
+// 120MHz - 10kHz
+//#define NCYCLESTON 27         // Number of cycles corresponding to ton count
+//#define NCYCLESTOFF 20.86        // Number of cycles corresponding to toff count
+// 120MHz - 1kHz
 //#define NCYCLESTON 27         // Number of cycles corresponding to ton count
 //#define NCYCLESTOFF 21        // Number of cycles corresponding to toff count
-//24MHz - 1kHz
+// 24MHz - 1kHz
 //#define NCYCLESTON 23         // Number of cycles corresponding to ton count
 //#define NCYCLESTOFF 21        // Number of cycles corresponding to toff count
+// Melhor resolucao
+//#define NCYCLESTON 25        // Number of cycles corresponding to ton count
+//#define NCYCLESTOFF 21        // Number of cycles corresponding to toff count
+// 1 por cento
+#define NCYCLESTON 2500        // Number of cycles corresponding to ton count
+#define NCYCLESTOFF 20        // Number of cycles corresponding to toff count
 
 extern void UARTStdioIntHandler(void);
 
