@@ -35,9 +35,20 @@
 // Defines
 //
 #define NUM ((24000000/2)/8)
-#define SAMPLES 2000           // Number of samples used to get the measure
-#define NCYCLESTON 23         // Number of cycles corresponding to ton count
-#define NCYCLESTOFF 20.7        // Number of cycles corresponding to toff count
+#define SAMPLES 1000           // Number of samples used to get the measure
+
+//24MHz - 10kHz
+//#define NCYCLESTON 23         // Number of cycles corresponding to ton count
+//#define NCYCLESTOFF 20.7        // Number of cycles corresponding to toff count
+//120MHz - 10kHz
+#define NCYCLESTON 27         // Number of cycles corresponding to ton count
+#define NCYCLESTOFF 20.86        // Number of cycles corresponding to toff count
+//120MHz - 1kHz
+//#define NCYCLESTON 27         // Number of cycles corresponding to ton count
+//#define NCYCLESTOFF 21        // Number of cycles corresponding to toff count
+//24MHz - 1kHz
+//#define NCYCLESTON 23         // Number of cycles corresponding to ton count
+//#define NCYCLESTOFF 21        // Number of cycles corresponding to toff count
 
 extern void UARTStdioIntHandler(void);
 
@@ -62,7 +73,7 @@ void UARTInit(void)
     GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
     
     // Initialize the UART for console I/O.
-    UARTStdioConfig(0, 115200, SystemCoreClock);
+    UARTStdioConfig(0, 921600, SystemCoreClock);
 } // UARTInit
 
 void UART0_Handler(void)
@@ -152,7 +163,7 @@ void main(void)
         }
         ton_f = (float)tonMed/SAMPLES;
         toff_f = (float)toffMed/SAMPLES;
-        
+
         // Conversao para MICRO segundos
         ton_f = (float)(1000000*(float)NCYCLESTON*((float)(ton_f/SystemCoreClock)));
         toff_f = (float)(1000000*(float)NCYCLESTOFF*((float)(toff_f/SystemCoreClock)));
@@ -166,7 +177,7 @@ void main(void)
         sprintf(T_str,"%.2f",T);
         sprintf(f_str,"%.2f",f);
         sprintf(D_str,"%.2f",D);
-        UARTprintf("T = %s ns | f = %s Hz | D = %s \n",T_str,f_str,D_str);
+        UARTprintf("T = %s us | f = %s Hz | D = %s \n",T_str,f_str,D_str);
         
         // Limpa ton e toff
         for(i=0; i<SAMPLES; i++)
