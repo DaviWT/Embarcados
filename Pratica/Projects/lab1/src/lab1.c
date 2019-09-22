@@ -38,14 +38,14 @@
 #define SAMPLES 1000           // Number of samples used to get the measure
 
 //24MHz - 10kHz
-//#define NCYCLESTON 23         // Number of cycles corresponding to ton count
-//#define NCYCLESTOFF 20.7        // Number of cycles corresponding to toff count
+//#define NCYCLESTON 23.44         // Number of cycles corresponding to ton count
+//#define NCYCLESTOFF 21.25        // Number of cycles corresponding to toff count
 //120MHz - 10kHz
-#define NCYCLESTON 27         // Number of cycles corresponding to ton count
-#define NCYCLESTOFF 20.86        // Number of cycles corresponding to toff count
-//120MHz - 1kHz
 //#define NCYCLESTON 27         // Number of cycles corresponding to ton count
-//#define NCYCLESTOFF 21        // Number of cycles corresponding to toff count
+//#define NCYCLESTOFF 20.86        // Number of cycles corresponding to toff count
+//120MHz - 1kHz
+#define NCYCLESTON 27         // Number of cycles corresponding to ton count
+#define NCYCLESTOFF 21        // Number of cycles corresponding to toff count
 //24MHz - 1kHz
 //#define NCYCLESTON 23         // Number of cycles corresponding to ton count
 //#define NCYCLESTOFF 21        // Number of cycles corresponding to toff count
