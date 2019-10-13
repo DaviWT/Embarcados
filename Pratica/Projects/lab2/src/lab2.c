@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include "inc/hw_ints.h"
 #include "inc/hw_memmap.h"
 #include "driverlib/gpio.h"
 #include "driverlib/sysctl.h"
@@ -29,7 +30,6 @@
 #include "driverlib/uart.h"
 #include "driverlib/fpu.h"
 #include "driverlib/pin_map.h"
-#include "inc/hw_ints.h"
 #include "driverlib/interrupt.h"
 #include "driverlib/timer.h"
 #include "system_TM4C1294.h" 
@@ -37,9 +37,15 @@
 //
 // Defines
 //
+#define TIMER_MS 2      //up to 2.7
 
+//
+// Global Variables
+//
 extern void UARTStdioIntHandler(void);
 int flagInterrTimerA0;
+int PIN_N5_STATE=0;
+
 //******************************************************************************
 //
 // UART Configuration
@@ -76,10 +82,12 @@ void UART0_Handler(void)
 //******************************************************************************
 void TimerA0Isr(void)
 {
-    TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);  // Clear the timer interrupt
-    UARTprintf("Interrupcao do Timer A0\n");
-    flagInterrTimerA0 = 1;
-    //digitalWrite(RED_LED, digitalRead(RED_LED) ^ 1);              // toggle LED pin
+    TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);  // Clear timer interrupt
+//    UARTprintf("Interrupcao do Timer A0\n");
+//    flagInterrTimerA0 = 1;
+    PIN_N5_STATE ^= GPIO_PIN_5;
+    //digitalWrite(RED_LED, digitalRead(RED_LED) ^ 1);         // toggle LED pin
+    TimerEnable(TIMER0_BASE, TIMER_A);
 }
 
 void TIMERInit()
@@ -96,7 +104,8 @@ void TIMERInit()
     TIMER_CFG_B_CAP_COUNT));
     
     // Set the count time for the the one-shot timer (TimerA).
-    TimerLoadSet(TIMER0_BASE, TIMER_A, 3000);
+    TimerLoadSet(TIMER0_BASE, TIMER_A, SystemCoreClock*TIMER_MS/1000);   //1ms
+//    TimerLoadSet(TIMER0_BASE, TIMER_A, 0xFFFF);   //x ms
     
     // Configure the counter (TimerB) to count both edges.
     TimerControlEvent(TIMER0_BASE, TIMER_B, TIMER_EVENT_BOTH_EDGES);
@@ -106,6 +115,12 @@ void TIMERInit()
     
     // Enable the timers.
     TimerEnable(TIMER0_BASE, TIMER_BOTH);
+    
+    // Enable processor interrupts.
+//    IntMasterEnable();
+    
+    // Enable the Timer0B interrupt on the processor (NVIC).
+//    IntEnable(INT_TIMER0B);
     
     // Enable timer interrupt
     TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
@@ -131,6 +146,14 @@ void GPIOInit()
                       GPIO_STRENGTH_2MA,
                       GPIO_PIN_TYPE_STD_WPU );
     
+    // Configure output pin for debug purposes
+    GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_5); // PIN N5 como saída
+    GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_5, 0); // PIN N5 apagados
+    GPIOPadConfigSet(GPIO_PORTN_BASE, 
+                     GPIO_PIN_5, 
+                     GPIO_STRENGTH_12MA, 
+                     GPIO_PIN_TYPE_STD);        //Configuration
+    
     // Set pin PL4 to timer capture for signal in
     GPIOPinConfigure(GPIO_PL4_T0CCP0);  
     GPIOPinTypeTimer(GPIO_PORTL_BASE, GPIO_PIN_4);
@@ -144,29 +167,17 @@ void GPIOInit()
 void main(void)
 {
     // Variaveis
-    int count = 0;
   
     // Inicializa periféricos
     GPIOInit();
-    UARTInit();
     TIMERInit();
+    UARTInit();
     
-    UARTprintf("Hello World!\n");
+    UARTprintf("Hello World do Adriano e do Davi!\n");
     
-    flagInterrTimerA0 = 0;
-    count = 0;
     while(1)
     {
-        while(flagInterrTimerA0 == 0)
-        {
-            count++;
-        }
-        UARTprintf("count = %i\n",count);
-        flagInterrTimerA0 = 0;
-        count = 0;
-        while(count < 50000)
-          count++;
-        count = 0;
-        TimerEnable(TIMER0_BASE, TIMER_A);
+      GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_5, PIN_N5_STATE); // Blink PIN N4
     }
+    
 } // main
