@@ -47,6 +47,7 @@
 extern void UARTStdioIntHandler(void);
 int flagInterrTimerA0;
 int PIN_N5_STATE=0;
+int timerCount = 0; // Get current timer value obtained by capture mode
 
 //******************************************************************************
 //
@@ -129,8 +130,9 @@ void TimerA0Isr(void)
 void TimerB0Isr(void)
 {
     TimerIntClear(TIMER0_BASE, TIMER_CAPB_EVENT);  // Clear timer interrupt
-    PIN_N5_STATE ^= GPIO_PIN_5;
     HWREG(TIMER0_BASE + 0x050) = 0xFFFF;  // Reset Timer0A counting
+    PIN_N5_STATE ^= GPIO_PIN_5;
+    timerCount = TimerValueGet(TIMER0_BASE, TIMER_B);
 }
 
 void TIMERInit()
@@ -143,13 +145,11 @@ void TIMERInit()
 
     // Configure TimerA as a half-width one-shot timer, and TimerB as a
     // half-width edge capture counter.
-    TimerConfigure(TIMER0_BASE, (TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_ONE_SHOT |
-    TIMER_CFG_B_CAP_COUNT));
+    TimerConfigure(TIMER0_BASE, (TIMER_CFG_SPLIT_PAIR | TIMER_CFG_A_ONE_SHOT_UP |
+    TIMER_CFG_B_CAP_TIME_UP));
     
     // Set the count time for the the one-shot timer (TimerA).
     TimerLoadSet(TIMER0_BASE, TIMER_A, SystemCoreClock*TIMER_MS/1000);   //1ms
-//    TimerLoadSet(TIMER0_BASE, TIMER_B, 0xFFFF);
-//    TimerLoadSet(TIMER0_BASE, TIMER_A, 0xFFFF);   //x ms
     
     //TimerLoadSet(TIMER0_BASE, TIMER_B, 0xFFFF);
     //TimerMatchSet(TIMER0_BASE, TIMER_B, 0x0);
@@ -160,12 +160,6 @@ void TIMERInit()
     // Registering ISRs
     TimerIntRegister(TIMER0_BASE, TIMER_A, TimerA0Isr);
     TimerIntRegister(TIMER0_BASE, TIMER_B, TimerB0Isr);
-    
-    // Enable processor interrupts.
-    //IntMasterEnable();
-    
-    // Enable the Timer0B interrupt on the processor (NVIC).
-    //IntEnable(INT_TIMER0B);
     
     // Enable timer interrupt
     TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
@@ -222,36 +216,47 @@ void GPIOInit()
 //******************************************************************************
 void main(void)
 {
-    // Variaveis
-    //int flagOverTime = 0;
-    int count = 0;
-    int countAnterior = 1;
-  
     // Inicializa periféricos
+    FPUEnable();
+    FPULazyStackingEnable();
+    IntMasterEnable();
     GPIOInit();
     TIMERInit();
     UARTInit();
     PWMInit();
     
+    // Variaveis
+    //int count = 0;
+    //int countAnterior = 1;
+    float ton_f=0, toff_f=0;    // Tempo ligado e tempo desligado
+    float T=10, f=0, D=0;       // Parametros a serem exibidos na tela
+    char T_str[10], f_str[10], D_str[10];
+    
+    // Mensagem de Inicio
     UARTprintf("Hello World do Adriano e do Davi!\n");
     
     while(1)
     {
         GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_5, PIN_N5_STATE); // Blink PIN N4
         
-        // Codigo de teste para mostrar como zera contador do one-shot
-        //if (flagOverTime == 0)
-        //{
-        //    HWREG(TIMER0_BASE + 0x050) = 0xFFFF; // Reset Timer0A counting
-        //    flagOverTime = 1;
-        //}
+//        // Calculo dos parametros do sinal
+//        T = ton_f + toff_f;
+//        f = (float)1000000/T;
+//        D = (float)100*ton_f/T;
+//        
+//        // Envia os parametros por UART
+//        sprintf(T_str,"%.2f",T);
+//        sprintf(f_str,"%.2f",f);
+//        sprintf(D_str,"%.2f",D);
+//        UARTprintf("T = %s us | f = %s Hz | D = %s \n",T_str,f_str,D_str);
+//        while( UARTBusy(UART0_BASE) ){}
         
         // Get the current timer count.
-        count = TimerValueGet(TIMER0_BASE, TIMER_B);
-        if (count != countAnterior)
-        {
-            countAnterior = count;
-        }
+        //count = TimerValueGet(TIMER0_BASE, TIMER_B);
+        //if (count != countAnterior)
+        //{
+        //    countAnterior = count;
+        //}
         
   
     }
