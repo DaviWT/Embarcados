@@ -48,6 +48,9 @@ extern void UARTStdioIntHandler(void);
 int flagInterrTimerA0;
 int PIN_N5_STATE=0;
 int timerCount = 0; // Get current timer value obtained by capture mode
+int timerCountLast = 0;
+int ton = 0, toff = 0;
+int T = 10;
 
 //******************************************************************************
 //
@@ -98,13 +101,13 @@ void PWMInit (void)
     
     // Set the Period (expressed in clock ticks). For Example, in order to make
     // a PWM clock with 10kHZ, is used 12000 clock ticks.
-    PWMGenPeriodSet(PWM0_BASE, PWM_GEN_0, 300);
+    PWMGenPeriodSet(PWM0_BASE, PWM_GEN_0, 1500);
     
-    // Set the pulse width of PWM0 for a 50% duty cycle.
-    PWMPulseWidthSet(PWM0_BASE, PWM_OUT_0, 200);
+    // Set the pulse width of PWM0 for a 30% duty cycle.
+    PWMPulseWidthSet(PWM0_BASE, PWM_OUT_0, 450);
 
-    // Set the pulse width of PWM1 for a 10% duty cycle.
-    PWMPulseWidthSet(PWM0_BASE, PWM_OUT_1, 200);
+    // Set the pulse width of PWM1 for a 30% duty cycle.
+    PWMPulseWidthSet(PWM0_BASE, PWM_OUT_1, 450);
     
     // Enable the PWM generator
     PWMGenEnable(PWM0_BASE, PWM_GEN_0);
@@ -132,6 +135,7 @@ void TimerB0Isr(void)
     TimerIntClear(TIMER0_BASE, TIMER_CAPB_EVENT);  // Clear timer interrupt
     HWREG(TIMER0_BASE + 0x050) = 0xFFFF;  // Reset Timer0A counting
     PIN_N5_STATE ^= GPIO_PIN_5;
+    GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_5, PIN_N5_STATE); // Blink PIN N4
     timerCount = TimerValueGet(TIMER0_BASE, TIMER_B);
 }
 
@@ -226,38 +230,60 @@ void main(void)
     PWMInit();
     
     // Variaveis
-    //int count = 0;
-    //int countAnterior = 1;
     float ton_f=0, toff_f=0;    // Tempo ligado e tempo desligado
-    float T=10, f=0, D=0;       // Parametros a serem exibidos na tela
+    float Tsec=10, fHz=0, D=0;  // Parametros a serem exibidos na tela
     char T_str[10], f_str[10], D_str[10];
+    //float teste = 0;          // Para testes
+    //char teste_str[10];       // Para testes
     
     // Mensagem de Inicio
     UARTprintf("Hello World do Adriano e do Davi!\n");
     
     while(1)
-    {
-        GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_5, PIN_N5_STATE); // Blink PIN N4
+    {        
+        // Sincronizacao
+        while(GPIOPinRead(GPIO_PORTL_BASE, GPIO_PIN_5) == GPIO_PIN_5){}
+        while(GPIOPinRead(GPIO_PORTL_BASE, GPIO_PIN_5) == 0){}
+        timerCountLast = timerCount;
         
-//        // Calculo dos parametros do sinal
-//        T = ton_f + toff_f;
-//        f = (float)1000000/T;
-//        D = (float)100*ton_f/T;
-//        
-//        // Envia os parametros por UART
-//        sprintf(T_str,"%.2f",T);
-//        sprintf(f_str,"%.2f",f);
-//        sprintf(D_str,"%.2f",D);
-//        UARTprintf("T = %s us | f = %s Hz | D = %s \n",T_str,f_str,D_str);
-//        while( UARTBusy(UART0_BASE) ){}
+        // Detecta a borda de subida
+        while(GPIOPinRead(GPIO_PORTL_BASE, GPIO_PIN_5) == GPIO_PIN_5){}
+        if (timerCount > timerCountLast)
+            ton = timerCount - timerCountLast;
+        else
+            ton = timerCount + 65536 - timerCountLast;
+      
+        // Detecta borda de descida
+        while(GPIOPinRead(GPIO_PORTL_BASE, GPIO_PIN_5) == 0){}
+        if (timerCount > timerCountLast)
+            T = timerCount - timerCountLast;
+        else
+            T = timerCount + 65536 - timerCountLast;
         
-        // Get the current timer count.
-        //count = TimerValueGet(TIMER0_BASE, TIMER_B);
-        //if (count != countAnterior)
-        //{
-        //    countAnterior = count;
-        //}
+        // Calculo do tempo desligado
+        toff = T - ton;
         
-  
+        // Conversao de ton e toff para MICRO segundos
+        ton_f = (float)((1000000*(float)ton)/SystemCoreClock);
+        toff_f = (float)((1000000*(float)toff)/SystemCoreClock);
+        
+        // Calculo dos parametros
+        Tsec = ton_f + toff_f;
+        fHz = (float)1000000/Tsec;
+        D = (float)100*ton/T;
+        
+        // Envia os parametros por UART
+        sprintf(T_str,"%.2f",Tsec);
+        sprintf(f_str,"%.2f",fHz);
+        sprintf(D_str,"%.2f",D);
+        UARTprintf("T = %s us | f = %s Hz | D = %s \n",T_str,f_str,D_str);
+        while( UARTBusy(UART0_BASE) ){}
+        
+        // Para testes
+        //teste = D;
+        //sprintf(teste_str,"%.2f",teste);
+        //UARTprintf("teste_str = %s \n",teste_str);
+        //while( UARTBusy(UART0_BASE) ){}
+        
     }
 } // main
