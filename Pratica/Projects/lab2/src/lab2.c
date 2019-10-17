@@ -153,10 +153,14 @@ void TimerB0Isr(void)
 {
     TimerIntClear(TIMER0_BASE, TIMER_CAPB_EVENT);  // Clear timer interrupt
     HWREG(TIMER0_BASE + 0x050) = 0xFFFF;  // Reset Timer0A counting
+    
     // Para testes com o analisador logico
     //PIN_N5_STATE ^= GPIO_PIN_5;
     //GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_5, PIN_N5_STATE); // Blink PIN N4
-    timerCount = TimerValueGet(TIMER0_BASE, TIMER_B);
+    
+    timerCount = TimerValueGet(TIMER0_BASE, TIMER_B);   //Get first 16-bits
+    int timerPrescaler = TimerPrescaleMatchGet(TIMER0_BASE, TIMER_B);   //Get 8-bits left
+    timerCount = (timerPrescaler<<16) | timerCount;     //Concatenate to make a 24-bits value
 }
 
 void TIMERInit()
@@ -177,6 +181,9 @@ void TIMERInit()
     
     // Set the prescaler for TimerA
     TimerPrescaleSet(TIMER0_BASE, TIMER_A, 10);
+    
+    // Set the prescaler for TimerB
+    TimerPrescaleSet(TIMER0_BASE, TIMER_B, 0xFF);       //8-bit prescaler
     
     //TimerLoadSet(TIMER0_BASE, TIMER_B, 0xFFFF);
     //TimerMatchSet(TIMER0_BASE, TIMER_B, 0x0);
@@ -282,14 +289,14 @@ void main(void)
         if (timerCount > timerCountLast)
             ton = timerCount - timerCountLast;
         else
-            ton = timerCount + 65536 - timerCountLast;
+            ton = timerCount + 0xFFFFFF - timerCountLast;
       
         // Detecta borda de descida
         while(GPIOPinRead(GPIO_PORTL_BASE, GPIO_PIN_5) == 0){}
         if (timerCount > timerCountLast)
             T = timerCount - timerCountLast;
         else
-            T = timerCount + 65536 - timerCountLast;
+            T = timerCount + 0xFFFFFF - timerCountLast;
         
         // Otimizacao
         if(ton <= T)
