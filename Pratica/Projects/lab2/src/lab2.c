@@ -40,6 +40,14 @@
 // Defines
 //
 #define TIMER_MS 2      //up to 2.7
+#define REPETICOES 1
+
+#define DEBUG_MODE 1
+
+#if DEBUG_MODE
+#define PWM_CLOCK 10000
+#define PWM_DUTY 30
+#endif
 
 //
 // Global Variables
@@ -73,7 +81,7 @@ void UARTInit(void)
     GPIOPinTypeUART(GPIO_PORTA_BASE, GPIO_PIN_0 | GPIO_PIN_1);
     
     // Initialize the UART for console I/O.
-    UARTStdioConfig(0, 115200, SystemCoreClock);
+    UARTStdioConfig(0, 921600, SystemCoreClock);
 } // UARTInit
 
 void UART0_Handler(void)
@@ -101,13 +109,16 @@ void PWMInit (void)
     
     // Set the Period (expressed in clock ticks). For Example, in order to make
     // a PWM clock with 10kHZ, is used 12000 clock ticks.
-    PWMGenPeriodSet(PWM0_BASE, PWM_GEN_0, 1500);
+//    PWMGenPeriodSet(PWM0_BASE, PWM_GEN_0, SystemCoreClock/(8*PWM_CLOCK));
+    PWMGenPeriodSet(PWM0_BASE, PWM_GEN_0, 15000);
     
     // Set the pulse width of PWM0 for a 30% duty cycle.
-    PWMPulseWidthSet(PWM0_BASE, PWM_OUT_0, 450);
+//    PWMPulseWidthSet(PWM0_BASE, PWM_OUT_0, (PWM_DUTY/100)*SystemCoreClock/(8*PWM_CLOCK));
+    PWMPulseWidthSet(PWM0_BASE, PWM_OUT_0, 4500);
 
     // Set the pulse width of PWM1 for a 30% duty cycle.
-    PWMPulseWidthSet(PWM0_BASE, PWM_OUT_1, 450);
+//    PWMPulseWidthSet(PWM0_BASE, PWM_OUT_1, (PWM_DUTY/100)*SystemCoreClock/(8*PWM_CLOCK));
+    PWMPulseWidthSet(PWM0_BASE, PWM_OUT_1, 4500);
     
     // Enable the PWM generator
     PWMGenEnable(PWM0_BASE, PWM_GEN_0);
@@ -125,7 +136,15 @@ void TimerA0Isr(void)
     TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);  // Clear timer interrupt
 //    UARTprintf("Interrupcao do Timer A0\n");
 //    flagInterrTimerA0 = 1;
+    // Para testes com o analisador logica
     PIN_N5_STATE ^= GPIO_PIN_5;
+    GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_5, PIN_N5_STATE); // Blink PIN N4
+    if (GPIOPinRead(GPIO_PORTL_BASE, GPIO_PIN_5) == 0)
+        UARTprintf("T = ? | f = ? | D = 0 \n");
+    else
+        UARTprintf("T = ? | f = ? | D = 100 \n");
+    while( UARTBusy(UART0_BASE) ){}
+
     //digitalWrite(RED_LED, digitalRead(RED_LED) ^ 1);         // toggle LED pin
     TimerEnable(TIMER0_BASE, TIMER_A);
 }
@@ -134,8 +153,9 @@ void TimerB0Isr(void)
 {
     TimerIntClear(TIMER0_BASE, TIMER_CAPB_EVENT);  // Clear timer interrupt
     HWREG(TIMER0_BASE + 0x050) = 0xFFFF;  // Reset Timer0A counting
-    PIN_N5_STATE ^= GPIO_PIN_5;
-    GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_5, PIN_N5_STATE); // Blink PIN N4
+    // Para testes com o analisador logico
+    //PIN_N5_STATE ^= GPIO_PIN_5;
+    //GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_5, PIN_N5_STATE); // Blink PIN N4
     timerCount = TimerValueGet(TIMER0_BASE, TIMER_B);
 }
 
@@ -153,7 +173,10 @@ void TIMERInit()
     TIMER_CFG_B_CAP_TIME_UP));
     
     // Set the count time for the the one-shot timer (TimerA).
-    TimerLoadSet(TIMER0_BASE, TIMER_A, SystemCoreClock*TIMER_MS/1000);   //1ms
+    TimerLoadSet(TIMER0_BASE, TIMER_A, SystemCoreClock*TIMER_MS/1000);
+    
+    // Set the prescaler for TimerA
+    TimerPrescaleSet(TIMER0_BASE, TIMER_A, 10);
     
     //TimerLoadSet(TIMER0_BASE, TIMER_B, 0xFFFF);
     //TimerMatchSet(TIMER0_BASE, TIMER_B, 0x0);
@@ -164,6 +187,10 @@ void TIMERInit()
     // Registering ISRs
     TimerIntRegister(TIMER0_BASE, TIMER_A, TimerA0Isr);
     TimerIntRegister(TIMER0_BASE, TIMER_B, TimerB0Isr);
+    
+    // Interrupt priorities
+    IntPrioritySet(INT_TIMER0A, 0);
+    IntPrioritySet(INT_TIMER0B, 1);
     
     // Enable timer interrupt
     TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
@@ -227,12 +254,16 @@ void main(void)
     GPIOInit();
     TIMERInit();
     UARTInit();
+#if DEBUG_MODE
     PWMInit();
+#endif
     
     // Variaveis
     float ton_f=0, toff_f=0;    // Tempo ligado e tempo desligado
     float Tsec=10, fHz=0, D=0;  // Parametros a serem exibidos na tela
     char T_str[10], f_str[10], D_str[10];
+    int nRepeticoes = REPETICOES;
+    int tonAnterior = 0;
     //float teste = 0;          // Para testes
     //char teste_str[10];       // Para testes
     
@@ -260,30 +291,43 @@ void main(void)
         else
             T = timerCount + 65536 - timerCountLast;
         
-        // Calculo do tempo desligado
-        toff = T - ton;
+        // Otimizacao
+        if(ton <= T)
+        {
+        //else if (ton == tonAnterior)
+        //    nRepeticoes++;
+        //else
+        //   nRepeticoes = 0; 
+        //tonAnterior = ton;
         
-        // Conversao de ton e toff para MICRO segundos
-        ton_f = (float)((1000000*(float)ton)/SystemCoreClock);
-        toff_f = (float)((1000000*(float)toff)/SystemCoreClock);
-        
-        // Calculo dos parametros
-        Tsec = ton_f + toff_f;
-        fHz = (float)1000000/Tsec;
-        D = (float)100*ton/T;
-        
-        // Envia os parametros por UART
-        sprintf(T_str,"%.2f",Tsec);
-        sprintf(f_str,"%.2f",fHz);
-        sprintf(D_str,"%.2f",D);
-        UARTprintf("T = %s us | f = %s Hz | D = %s \n",T_str,f_str,D_str);
-        while( UARTBusy(UART0_BASE) ){}
-        
-        // Para testes
-        //teste = D;
-        //sprintf(teste_str,"%.2f",teste);
-        //UARTprintf("teste_str = %s \n",teste_str);
-        //while( UARTBusy(UART0_BASE) ){}
-        
+        //if (nRepeticoes == REPETICOES)
+        //{
+            nRepeticoes = 0;
+            
+            // Calculo do tempo desligado
+            toff = T - ton;
+            
+            // Conversao de ton e toff para MICRO segundos
+            ton_f = (float)((1000000*(float)ton)/SystemCoreClock);
+            toff_f = (float)((1000000*(float)toff)/SystemCoreClock);
+            
+            // Calculo dos parametros
+            Tsec = ton_f + toff_f;
+            fHz = (float)1000000/Tsec;
+            D = (float)100*ton/T;
+            
+            // Envia os parametros por UART
+            sprintf(T_str,"%.2f",Tsec);
+            sprintf(f_str,"%.2f",fHz);
+            sprintf(D_str,"%.2f",D);
+            UARTprintf("T = %s us | f = %s Hz | D = %s \n",T_str,f_str,D_str);
+            while( UARTBusy(UART0_BASE) ){}
+            
+            // Para testes
+            //teste = D;
+            //sprintf(teste_str,"%.2f",teste);
+            //UARTprintf("teste_str = %s \n",teste_str);
+            //while( UARTBusy(UART0_BASE) ){}   
+        }
     }
 } // main
