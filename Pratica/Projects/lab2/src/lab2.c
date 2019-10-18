@@ -42,7 +42,7 @@
 #define TIMER_MS 2      //up to 2.7
 #define REPETICOES 1
 
-#define DEBUG_MODE 1
+#define DEBUG_MODE 0
 
 #if DEBUG_MODE
 #define PWM_CLOCK 10000
@@ -269,10 +269,10 @@ void main(void)
     float ton_f=0, toff_f=0;    // Tempo ligado e tempo desligado
     float Tsec=10, fHz=0, D=0;  // Parametros a serem exibidos na tela
     char T_str[10], f_str[10], D_str[10];
-    int nRepeticoes = REPETICOES;
-    int tonAnterior = 0;
+//    int nRepeticoes = REPETICOES;
+//    int tonAnterior = 0;
     //float teste = 0;          // Para testes
-    //char teste_str[10];       // Para testes
+//    char teste_str[10];       // Para testes
     
     // Mensagem de Inicio
     UARTprintf("Hello World do Adriano e do Davi!\n");
@@ -309,7 +309,7 @@ void main(void)
         
         //if (nRepeticoes == REPETICOES)
         //{
-            nRepeticoes = 0;
+//            nRepeticoes = 0;
             
             // Calculo do tempo desligado
             toff = T - ton;
@@ -330,11 +330,11 @@ void main(void)
             UARTprintf("T = %s us | f = %s Hz | D = %s \n",T_str,f_str,D_str);
             while( UARTBusy(UART0_BASE) ){}
             
-            // Para testes
-            //teste = D;
-            //sprintf(teste_str,"%.2f",teste);
-            //UARTprintf("teste_str = %s \n",teste_str);
-            //while( UARTBusy(UART0_BASE) ){}   
+//             Para testes
+//            teste = D;
+//            sprintf(teste_str,"%.2f",D);
+//            UARTprintf("teste_str = %s \n",teste_str);
+//            while( UARTBusy(UART0_BASE) ){}   
         }
     }
 } // main
