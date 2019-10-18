@@ -42,7 +42,7 @@
 #define TIMER_MS 2      //up to 2.7
 #define REPETICOES 1
 
-#define DEBUG_MODE 1
+#define DEBUG_MODE 0
 
 #if DEBUG_MODE
 #define PWM_CLOCK 10000
@@ -153,10 +153,14 @@ void TimerB0Isr(void)
 {
     TimerIntClear(TIMER0_BASE, TIMER_CAPB_EVENT);  // Clear timer interrupt
     HWREG(TIMER0_BASE + 0x050) = 0xFFFF;  // Reset Timer0A counting
+    
     // Para testes com o analisador logico
     //PIN_N5_STATE ^= GPIO_PIN_5;
     //GPIOPinWrite(GPIO_PORTN_BASE, GPIO_PIN_5, PIN_N5_STATE); // Blink PIN N4
-    timerCount = TimerValueGet(TIMER0_BASE, TIMER_B);
+    
+    timerCount = TimerValueGet(TIMER0_BASE, TIMER_B);   //Get first 16-bits
+    int timerPrescaler = TimerPrescaleMatchGet(TIMER0_BASE, TIMER_B);   //Get 8-bits left
+    timerCount = (timerPrescaler<<16) | timerCount;     //Concatenate to make a 24-bits value
 }
 
 void TIMERInit()
@@ -177,6 +181,9 @@ void TIMERInit()
     
     // Set the prescaler for TimerA
     TimerPrescaleSet(TIMER0_BASE, TIMER_A, 10);
+    
+    // Set the prescaler for TimerB
+    TimerPrescaleSet(TIMER0_BASE, TIMER_B, 0xFF);       //8-bit prescaler
     
     //TimerLoadSet(TIMER0_BASE, TIMER_B, 0xFFFF);
     //TimerMatchSet(TIMER0_BASE, TIMER_B, 0x0);
@@ -262,10 +269,10 @@ void main(void)
     float ton_f=0, toff_f=0;    // Tempo ligado e tempo desligado
     float Tsec=10, fHz=0, D=0;  // Parametros a serem exibidos na tela
     char T_str[10], f_str[10], D_str[10];
-    int nRepeticoes = REPETICOES;
-    int tonAnterior = 0;
+//    int nRepeticoes = REPETICOES;
+//    int tonAnterior = 0;
     //float teste = 0;          // Para testes
-    //char teste_str[10];       // Para testes
+//    char teste_str[10];       // Para testes
     
     // Mensagem de Inicio
     UARTprintf("Hello World do Adriano e do Davi!\n");
@@ -282,14 +289,14 @@ void main(void)
         if (timerCount > timerCountLast)
             ton = timerCount - timerCountLast;
         else
-            ton = timerCount + 65536 - timerCountLast;
+            ton = timerCount + 0xFFFFFF - timerCountLast;
       
         // Detecta borda de descida
         while(GPIOPinRead(GPIO_PORTL_BASE, GPIO_PIN_5) == 0){}
         if (timerCount > timerCountLast)
             T = timerCount - timerCountLast;
         else
-            T = timerCount + 65536 - timerCountLast;
+            T = timerCount + 0xFFFFFF - timerCountLast;
         
         // Otimizacao
         if(ton <= T)
@@ -302,7 +309,7 @@ void main(void)
         
         //if (nRepeticoes == REPETICOES)
         //{
-            nRepeticoes = 0;
+//            nRepeticoes = 0;
             
             // Calculo do tempo desligado
             toff = T - ton;
@@ -323,11 +330,11 @@ void main(void)
             UARTprintf("T = %s us | f = %s Hz | D = %s \n",T_str,f_str,D_str);
             while( UARTBusy(UART0_BASE) ){}
             
-            // Para testes
-            //teste = D;
-            //sprintf(teste_str,"%.2f",teste);
-            //UARTprintf("teste_str = %s \n",teste_str);
-            //while( UARTBusy(UART0_BASE) ){}   
+//             Para testes
+//            teste = D;
+//            sprintf(teste_str,"%.2f",D);
+//            UARTprintf("teste_str = %s \n",teste_str);
+//            while( UARTBusy(UART0_BASE) ){}   
         }
     }
 } // main
